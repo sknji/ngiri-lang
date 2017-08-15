@@ -10,6 +10,10 @@ type Lexer struct {
 	ch           byte
 }
 
+func NewLexerFromFile(filename string) *Lexer {
+	return NewLexer(getFileContent(filename))
+}
+
 func NewLexer(input string) *Lexer {
 	l := &Lexer{input: input}
 	l.readChar()
