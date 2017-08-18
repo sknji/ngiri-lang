@@ -1,11 +1,11 @@
 package ast
 
 import (
-	"testing"
 	"github.com/nerdysquirrel/monkey-lang/token"
+	"testing"
 )
 
-func TestString(t *testing.T)  {
+func TestString(t *testing.T) {
 	prog := &Program{
 		Statements: []Statement{
 			&LetStatement{
