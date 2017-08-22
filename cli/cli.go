@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/nerdysquirrel/monkey-lang/lexer"
+	"github.com/nerdysquirrel/monkey-lang/parser"
 	"github.com/nerdysquirrel/monkey-lang/token"
 )
 
@@ -28,11 +29,15 @@ func main() {
 	flag.Parse()
 
 	if fileName != "" {
-		lex := lexer.NewLexerFromFile(fileName)
-
-		for tok := lex.NextToken(); tok.Type != token.EOF; tok = lex.NextToken() {
-			fmt.Printf("%+v\n", tok)
+		p := parser.NewParser(lexer.NewLexerFromFile(fileName))
+		prog := p.ParseProgram()
+		if len(p.Errors()) > 0 {
+			for _, err := range p.Errors() {
+				fmt.Printf("Parser error: %s\n", err)
+			}
 		}
+
+		fmt.Printf("Program: %s.\n", prog.String())
 	}
 
 	if interactive && fileName == "" {
