@@ -3,6 +3,7 @@ package ast
 import (
 	"bytes"
 	"github.com/nerdysquirrel/monkey-lang/token"
+	"strings"
 )
 
 type Node interface {
@@ -210,6 +211,33 @@ func (ie *IfExpression) String() string {
 		out.WriteString("else ")
 		out.WriteString(ie.Alternative.String())
 	}
+
+	return out.String()
+}
+
+type FunctionExpression struct {
+	Token token.Token
+
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+func (fe *FunctionExpression) expressionNode()      {}
+func (fe *FunctionExpression) TokenLiteral() string { return fe.Token.Literal }
+func (fe *FunctionExpression) String() string {
+	var out bytes.Buffer
+
+	params := []string{}
+
+	for _, p := range fe.Parameters {
+		params = append(params, p.String())
+	}
+
+	out.WriteString(fe.TokenLiteral())
+	out.WriteString("( ")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") ")
+	out.WriteString(fe.Body.String())
 
 	return out.String()
 }

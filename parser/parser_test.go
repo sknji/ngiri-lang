@@ -362,7 +362,7 @@ func testInfixExpression(
 		return false
 	}
 
-	if !testLiteralExpression(t, opExp.Right, left) {
+	if !testLiteralExpression(t, opExp.Right, right) {
 		return false
 	}
 
@@ -430,4 +430,43 @@ func TestIfExpression(t *testing.T) {
 		t.Errorf("exp.Alternative.Statements is not nil. got=%+v",
 			exp.Alternative)
 	}
+}
+
+func TestFunctionExpression(t *testing.T) {
+	input := `fn(x, y) { x + y; }`
+
+	prog := testParserSetup(t, input, 1)
+
+	stmt, ok := prog.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Errorf("prog.Statements[0] is not ast.ExpressionStatement. got=%T",
+			prog.Statements[0])
+	}
+
+	function, ok := stmt.Expression.(*ast.FunctionExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.FunctionExpression. got=%T",
+			stmt.Expression)
+	}
+
+	if len(function.Parameters) != 2 {
+		t.Fatalf("function paramters wrong. expected=2 got=%d",
+			len(function.Parameters))
+	}
+
+	testLiteralExpression(t, function.Parameters[0], "x")
+	testLiteralExpression(t, function.Parameters[1], "y")
+
+	if len(function.Body.Statements) != 1 {
+		t.Fatalf("function.Body.Statement expected 1 statements. got=%d",
+			len(function.Body.Statements))
+	}
+
+	bodyStmt, ok := function.Body.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("function body statement is not *ast.ExpressionStatement. got=%T",
+			function.Body.Statements[0])
+	}
+
+	testInfixExpression(t, bodyStmt.Expression, "x", "+", "y")
 }
