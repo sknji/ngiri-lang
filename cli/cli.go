@@ -10,7 +10,7 @@ import (
 
 	"github.com/nerdysquirrel/monkey-lang/lexer"
 	"github.com/nerdysquirrel/monkey-lang/parser"
-	"github.com/nerdysquirrel/monkey-lang/token"
+	"github.com/nerdysquirrel/monkey-lang/runtime"
 )
 
 const PROMPT = ">> "
@@ -57,10 +57,22 @@ func StartInteractiveMode(r io.Reader, w io.Writer) {
 		}
 
 		line := scanner.Text()
-		lex := lexer.NewLexer(line)
-
-		for tok := lex.NextToken(); tok.Type != token.EOF; tok = lex.NextToken() {
-			fmt.Printf("%+v\n", tok)
+		p := parser.NewParser(lexer.NewLexer(line))
+		if len(p.Errors()) > 0 {
+			printParseErrors(w, p.Errors())
+			continue
 		}
+
+		evaluated := runtime.Eval(p.ParseProgram())
+		if evaluated != nil {
+			io.WriteString(w, evaluated.Inspect())
+			io.WriteString(w, "\n")
+		}
+	}
+}
+
+func printParseErrors(w io.Writer, errors []string) {
+	for _, err := range errors {
+		io.WriteString(w, err)
 	}
 }
