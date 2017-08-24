@@ -11,6 +11,7 @@ import (
 	"github.com/nerdysquirrel/monkey-lang/lexer"
 	"github.com/nerdysquirrel/monkey-lang/parser"
 	"github.com/nerdysquirrel/monkey-lang/runtime"
+	"github.com/nerdysquirrel/monkey-lang/object"
 )
 
 const PROMPT = ">> "
@@ -30,14 +31,18 @@ func main() {
 
 	if fileName != "" {
 		p := parser.NewParser(lexer.NewLexerFromFile(fileName))
-		prog := p.ParseProgram()
 		if len(p.Errors()) > 0 {
 			for _, err := range p.Errors() {
 				fmt.Printf("Parser error: %s\n", err)
 			}
 		}
 
-		fmt.Printf("Program: %s.\n", prog.String())
+		env := object.NewEnvironment()
+		evaluated := runtime.Eval(p.ParseProgram(), env)
+		if evaluated != nil {
+			io.WriteString(os.Stdout, evaluated.Inspect())
+			io.WriteString(os.Stdout, "\n")
+		}
 	}
 
 	if interactive && fileName == "" {
@@ -47,6 +52,7 @@ func main() {
 
 func StartInteractiveMode(r io.Reader, w io.Writer) {
 	scanner := bufio.NewScanner(r)
+	env := object.NewEnvironment()
 
 	for {
 		fmt.Printf(PROMPT)
@@ -63,7 +69,7 @@ func StartInteractiveMode(r io.Reader, w io.Writer) {
 			continue
 		}
 
-		evaluated := runtime.Eval(p.ParseProgram())
+		evaluated := runtime.Eval(p.ParseProgram(), env)
 		if evaluated != nil {
 			io.WriteString(w, evaluated.Inspect())
 			io.WriteString(w, "\n")
