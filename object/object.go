@@ -1,8 +1,8 @@
 package object
 
 import (
-	"fmt"
 	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/nerdysquirrel/monkey-lang/ast"
@@ -16,7 +16,9 @@ const (
 	NULL_OBJ         = "NULL"
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	ERROR_OBJ        = "ERROR"
-	FUNCTION_OBJ = "FUNCTION"
+	FUNCTION_OBJ     = "FUNCTION"
+	STRING_OBJ       = "STRING"
+	BUILTIN_OBJ      = "BUILTIN"
 )
 
 type Object interface {
@@ -59,12 +61,12 @@ func (e *Error) Type() ObjectType { return ERROR_OBJ }
 
 type Function struct {
 	Parameters []*ast.Identifier
-	Body *ast.BlockStatement
-	Env *Environment
+	Body       *ast.BlockStatement
+	Env        *Environment
 }
 
 func (f *Function) Type() ObjectType { return FUNCTION_OBJ }
-func (f *Function) Inspect() string  {
+func (f *Function) Inspect() string {
 	var out bytes.Buffer
 
 	params := []string{}
@@ -82,3 +84,19 @@ func (f *Function) Inspect() string  {
 
 	return out.String()
 }
+
+type String struct {
+	Value string
+}
+
+func (s *String) Inspect() string  { return s.Value }
+func (s *String) Type() ObjectType { return STRING_OBJ }
+
+type BuiltInFunction func(args ...Object) Object
+
+type BuiltIn struct {
+	FN BuiltInFunction
+}
+
+func (b *BuiltIn) Inspect() string  { return "builtin function" }
+func (b *BuiltIn) Type() ObjectType { return BUILTIN_OBJ }

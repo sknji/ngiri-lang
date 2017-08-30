@@ -200,10 +200,10 @@ func TestFunctionObject(t *testing.T) {
 }
 
 func TestFunctionApplication(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected int64
-	} {
+	}{
 		{"let identity = fn(x) { x; }; identity(5)", 5},
 		{"let identity = fn(x) { return x; }; identity(5)", 5},
 		{"let double = fn(x) { x * 2; }; double(5)", 10},
@@ -214,5 +214,64 @@ func TestFunctionApplication(t *testing.T) {
 
 	for _, tt := range tests {
 		testIntegerObject(t, testEval(tt.input), tt.expected)
+	}
+}
+
+func TestStringLiteral(t *testing.T) {
+	input := `"Hello world";`
+
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%+v)", evaluated, evaluated)
+	}
+	expected := "Hello world"
+	if str.Value != expected {
+		t.Errorf("String has wrong value. got=%q, expected=%q", str.Value, expected)
+	}
+}
+
+func TestStringConcatenation(t *testing.T) {
+	input := `"Hello" + " " + "world";`
+
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%+v)", evaluated, evaluated)
+	}
+	expected := "Hello world"
+	if str.Value != expected {
+		t.Errorf("String has wrong value. got=%q, expected=%q", str.Value, expected)
+	}
+}
+
+func TestBuiltInFunctions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`len("")`, 0},
+		{`len("four")`, 4},
+		{`len("Hello world")`, 11},
+		{`len(1)`, "argument to `len` not supported, got [INTEGER]"},
+		{`len("one", "two")`, "wrong number of arguments. got=[2], want=1"},
+	}
+
+	for _, tt := range tests {
+		obj := testEval(tt.input)
+		switch expected := tt.expected.(type) {
+		case int:
+			testIntegerObject(t, obj, int64(expected))
+		case string:
+			errObj, ok := obj.(*object.Error)
+			if !ok {
+				t.Errorf("object is not Error. got=%T (%+v)", obj, obj)
+				continue
+			}
+
+			if errObj.Message != expected {
+				t.Errorf("Wrong error message. expected=%q, got=%q", obj, errObj.Message)
+			}
+		}
 	}
 }

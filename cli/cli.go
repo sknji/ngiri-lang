@@ -9,9 +9,9 @@ import (
 	"os"
 
 	"github.com/nerdysquirrel/monkey-lang/lexer"
+	"github.com/nerdysquirrel/monkey-lang/object"
 	"github.com/nerdysquirrel/monkey-lang/parser"
 	"github.com/nerdysquirrel/monkey-lang/runtime"
-	"github.com/nerdysquirrel/monkey-lang/object"
 )
 
 const PROMPT = ">> "
