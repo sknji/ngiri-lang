@@ -15,6 +15,8 @@ const (
 	INT    = "INT"
 	STRING = "STRING"
 
+	LBRACKET = "["
+	RBRACKET = "]"
 	ASSIGN   = "="
 	PLUS     = "+"
 	MINUS    = "-"

@@ -2,8 +2,9 @@ package ast
 
 import (
 	"bytes"
-	"github.com/nerdysquirrel/monkey-lang/token"
 	"strings"
+
+	"github.com/nerdysquirrel/monkey-lang/token"
 )
 
 type Node interface {
@@ -274,6 +275,49 @@ func (ce *CallExpression) String() string {
 	out.WriteString("(")
 	out.WriteString(strings.Join(args, ", "))
 	out.WriteString(")")
+
+	return out.String()
+}
+
+type ListLiteral struct {
+	Token    token.Token
+	Elements []Expression
+}
+
+func (ll *ListLiteral) expressionNode()      {}
+func (ll *ListLiteral) TokenLiteral() string { return ll.Token.Literal }
+func (ll *ListLiteral) String() string {
+	var out bytes.Buffer
+
+	elem := []string{}
+
+	for _, arg := range ll.Elements {
+		elem = append(elem, arg.String())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elem, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}
+
+type IndexExpression struct {
+	Token token.Token
+	Left  Expression
+	Index Expression
+}
+
+func (ie *IndexExpression) expressionNode()      {}
+func (ie *IndexExpression) TokenLiteral() string { return ie.Token.Literal }
+func (ie *IndexExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(ie.Left.String())
+	out.WriteString("[")
+	out.WriteString(ie.Index.String())
+	out.WriteString("])")
 
 	return out.String()
 }
