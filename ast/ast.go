@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/nerdysquirrel/monkey-lang/token"
+	"github.com/marmotini/monkey-lang/token"
 )
 
 type Node interface {

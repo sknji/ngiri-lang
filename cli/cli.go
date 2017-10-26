@@ -8,10 +8,10 @@ import (
 	"io"
 	"os"
 
-	"github.com/nerdysquirrel/monkey-lang/lexer"
-	"github.com/nerdysquirrel/monkey-lang/object"
-	"github.com/nerdysquirrel/monkey-lang/parser"
-	"github.com/nerdysquirrel/monkey-lang/runtime"
+	"github.com/marmotini/monkey-lang/lexer"
+	"github.com/marmotini/monkey-lang/object"
+	"github.com/marmotini/monkey-lang/parser"
+	"github.com/marmotini/monkey-lang/runtime"
 )
 
 const PROMPT = ">> "

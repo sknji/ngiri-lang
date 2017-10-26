@@ -3,8 +3,8 @@ package runtime
 import (
 	"fmt"
 
-	"github.com/nerdysquirrel/monkey-lang/ast"
-	"github.com/nerdysquirrel/monkey-lang/object"
+	"github.com/marmotini/monkey-lang/ast"
+	"github.com/marmotini/monkey-lang/object"
 )
 
 var (

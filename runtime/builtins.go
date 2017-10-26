@@ -3,7 +3,7 @@ package runtime
 import (
 	"fmt"
 
-	"github.com/nerdysquirrel/monkey-lang/object"
+	"github.com/marmotini/monkey-lang/object"
 )
 
 var builtins = map[string]*object.BuiltIn{

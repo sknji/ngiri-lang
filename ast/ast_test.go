@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"github.com/nerdysquirrel/monkey-lang/token"
+	"github.com/marmotini/monkey-lang/token"
 	"testing"
 )
 

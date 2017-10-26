@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/nerdysquirrel/monkey-lang/ast"
-	"github.com/nerdysquirrel/monkey-lang/lexer"
-	"github.com/nerdysquirrel/monkey-lang/token"
+	"github.com/marmotini/monkey-lang/ast"
+	"github.com/marmotini/monkey-lang/lexer"
+	"github.com/marmotini/monkey-lang/token"
 )
 
 type (

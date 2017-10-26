@@ -3,9 +3,9 @@ package runtime
 import (
 	"testing"
 
-	"github.com/nerdysquirrel/monkey-lang/lexer"
-	"github.com/nerdysquirrel/monkey-lang/object"
-	"github.com/nerdysquirrel/monkey-lang/parser"
+	"github.com/marmotini/monkey-lang/lexer"
+	"github.com/marmotini/monkey-lang/object"
+	"github.com/marmotini/monkey-lang/parser"
 )
 
 func TestEvalIntegerExpression(t *testing.T) {
