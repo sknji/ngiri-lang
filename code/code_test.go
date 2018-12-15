@@ -2,8 +2,9 @@ package code
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMake(t *testing.T) {
@@ -13,6 +14,7 @@ func TestMake(t *testing.T) {
 		expected []byte
 	}{
 		{OpConstant, []int{65534}, []byte{byte(OpConstant), 255, 254}},
+		{OpAdd, []int{}, []byte{byte(OpAdd)}},
 	}
 
 	for _, tt := range tests {
@@ -28,22 +30,22 @@ func TestMake(t *testing.T) {
 
 func TestInstructionsString(t *testing.T) {
 	instructions := []Instructions{
-		Make(OpConstant, 1),
+		Make(OpAdd),
 		Make(OpConstant, 2),
 		Make(OpConstant, 65535),
 	}
 
-	expected := `0000 OpConstant 1
-	0003 OpConstant 2
-	0006 OpConstant 65535
-	`
+	expected := `0000 OpAdd
+0001 OpConstant 2
+0004 OpConstant 65535
+`
 
 	concatted := Instructions{}
 	for _, ins := range instructions {
 		concatted = append(concatted, ins...)
 	}
 
-	assert.Equal(t, concatted.String(), expected, "instructions wrongly formatted")
+	assert.Equal(t, expected, concatted.String(), "instructions wrongly formatted")
 }
 
 func TestReadOperands(t *testing.T) {
@@ -65,7 +67,7 @@ func TestReadOperands(t *testing.T) {
 		assert.Equal(t, n, tt.bytesRead, "n wrong")
 
 		for i, want := range tt.operands {
-			assert.Equal(t, operandsRead[i], want, "operands wrong")
+			assert.Equal(t, want, operandsRead[i], "operands wrong")
 		}
 	}
 }

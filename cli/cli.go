@@ -11,7 +11,7 @@ import (
 	"github.com/marmotini/monkey-lang/lexer"
 	"github.com/marmotini/monkey-lang/object"
 	"github.com/marmotini/monkey-lang/parser"
-	"github.com/marmotini/monkey-lang/runtime"
+	"github.com/marmotini/monkey-lang/interpreter"
 )
 
 const PROMPT = ">> "
@@ -38,7 +38,7 @@ func main() {
 		}
 
 		env := object.NewEnvironment()
-		evaluated := runtime.Eval(p.ParseProgram(), env)
+		evaluated := interpreter.Eval(p.ParseProgram(), env)
 		if evaluated != nil {
 			io.WriteString(os.Stdout, evaluated.Inspect())
 			io.WriteString(os.Stdout, "\n")
@@ -69,7 +69,7 @@ func StartInteractiveMode(r io.Reader, w io.Writer) {
 			continue
 		}
 
-		evaluated := runtime.Eval(p.ParseProgram(), env)
+		evaluated := interpreter.Eval(p.ParseProgram(), env)
 		if evaluated != nil {
 			io.WriteString(w, evaluated.Inspect())
 			io.WriteString(w, "\n")

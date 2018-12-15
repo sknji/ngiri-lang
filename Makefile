@@ -6,7 +6,11 @@ build:
 fmt:
 	@go fmt ./...
 
+tests:
+	@go test ./...
+
 .PHONY: build clean
 
 clean:
 	@rm -r monkey
+

@@ -1,6 +1,7 @@
 package code
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 )
@@ -12,15 +13,7 @@ type Definition struct {
 
 var definitions = map[OpCode]*Definition{
 	OpConstant: {"OpConstant", []int{2}},
-}
-
-func Lookup(op byte) (*Definition, error) {
-	def, ok := definitions[OpCode(op)]
-	if !ok {
-		return nil, fmt.Errorf("opCode %d undefinied", op)
-	}
-
-	return def, nil
+	OpAdd: {"OpAdd", []int{}},
 }
 
 type Instructions []byte
@@ -29,6 +22,7 @@ type OpCode byte
 
 const (
 	OpConstant OpCode = iota
+	OpAdd
 )
 
 func Make(op OpCode, operands ...int) []byte {
@@ -55,11 +49,54 @@ func Make(op OpCode, operands ...int) []byte {
 
 		offset += width
 	}
+
 	return instruction
 }
 
 func (ins Instructions) String() string {
-	return ""
+	var out bytes.Buffer
+
+	for i := 0; i < len(ins); {
+		def, err := Lookup(ins[i])
+		if err != nil {
+			fmt.Fprintf(&out, "Error: %s\n", err)
+			continue
+		}
+
+		operands, read := ReadOperands(def, ins[i+1:])
+
+		fmt.Fprintf(&out, "%04d %s\n", i, ins.fmtInstruction(def, operands))
+
+		i += 1 + read
+	}
+
+	return out.String()
+}
+
+func Lookup(op byte) (*Definition, error) {
+	def, ok := definitions[OpCode(op)]
+	if !ok {
+		return nil, fmt.Errorf("opCode %d undefinied", op)
+	}
+
+	return def, nil
+}
+
+func (ins Instructions) fmtInstruction(def *Definition, operands []int) string {
+	operandCount := len(def.OperandsWidths)
+
+	if len(operands) != operandCount {
+		return fmt.Sprintf("ERROR: operand len %d does not match defined %d\n", len(operands), operandCount)
+	}
+
+	switch operandCount {
+	case 0:
+		return def.Name
+	case 1:
+		return fmt.Sprintf("%s %d", def.Name, operands[0])
+	}
+
+	return fmt.Sprintf("ERROR: unhandled operandCount for %s\n", def.Name)
 }
 
 func ReadOperands(def *Definition, ins Instructions) ([]int, int) {

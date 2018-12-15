@@ -30,6 +30,7 @@ func TestIntegerArithmetic(t *testing.T) {
 			expectedInstructions: []code.Instructions{
 				code.Make(code.OpConstant, 0),
 				code.Make(code.OpConstant, 1),
+				code.Make(code.OpAdd),
 			},
 		},
 	}
@@ -58,7 +59,7 @@ func runCompilerTests(t *testing.T, tests []compilerTestCase) {
 }
 
 func testInstructions(expected []code.Instructions, actual code.Instructions) error {
-	concatted := concatInstrucions(expected)
+	concatted := concatInstructions(expected)
 
 	if len(actual) != len(concatted) {
 		return fmt.Errorf("wrong instruction length. \nwant=%q\ngot=%q", concatted, actual)
@@ -73,7 +74,7 @@ func testInstructions(expected []code.Instructions, actual code.Instructions) er
 	return nil
 }
 
-func concatInstrucions(s []code.Instructions) code.Instructions {
+func concatInstructions(s []code.Instructions) code.Instructions {
 	out := code.Instructions{}
 
 	for _, ins := range s {
@@ -82,6 +83,7 @@ func concatInstrucions(s []code.Instructions) code.Instructions {
 
 	return out
 }
+
 func testConstants(t *testing.T, expected []interface{}, actual []object.Object) error {
 	if len(expected) != len(actual) {
 		return fmt.Errorf("wrong number of constants. got=%d, want=%d", len(actual), len(expected))
