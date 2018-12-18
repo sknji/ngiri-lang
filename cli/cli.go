@@ -5,13 +5,15 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"github.com/marmotini/monkey-lang/compiler"
+	"github.com/marmotini/monkey-lang/vm"
 	"io"
 	"os"
 
+	"github.com/marmotini/monkey-lang/interpreter"
 	"github.com/marmotini/monkey-lang/lexer"
 	"github.com/marmotini/monkey-lang/object"
 	"github.com/marmotini/monkey-lang/parser"
-	"github.com/marmotini/monkey-lang/interpreter"
 )
 
 const PROMPT = ">> "
@@ -19,11 +21,13 @@ const PROMPT = ">> "
 var (
 	interactive bool
 	fileName    string
+	runVm       bool
 )
 
 func init() {
 	flag.BoolVar(&interactive, "i", false, "interactive mode")
 	flag.StringVar(&fileName, "f", "", "filename")
+	flag.BoolVar(&runVm, "vm", true, "run virtual machine")
 }
 
 func main() {
@@ -67,6 +71,26 @@ func StartInteractiveMode(r io.Reader, w io.Writer) {
 		if len(p.Errors()) > 0 {
 			printParseErrors(w, p.Errors())
 			continue
+		}
+
+		if runVm {
+			comp := compiler.NewCompiler()
+			err := comp.Compile(p)
+			if err != nil {
+				fmt.Printf(w, "Woops! Compilation failed:\n %s\n", err)
+				continue
+			}
+
+			machine := vm.NewVM(comp.Bytecode())
+			err = machine.Run()
+			if err != nil {
+				fmt.Fprintf(w, "Woops! Executing bytecode failed:\n %s\n", err)
+				continue
+			}
+
+			lastPopped := machine.LastPoppedStackElem()
+			io.WriteString(w, lastPopped.Inspect())
+			io.WriteString(w, "\n")
 		}
 
 		evaluated := interpreter.Eval(p.ParseProgram(), env)

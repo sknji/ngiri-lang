@@ -6,6 +6,22 @@ import (
 	"fmt"
 )
 
+type OpCode byte
+
+const (
+	OpConstant OpCode = iota
+	OpAdd
+	OpPop
+	OpSub
+	OpMul
+	OpDiv
+	OpTrue
+	OpFalse
+	OpEqual
+	OpNotEqual
+	OpGreaterThan
+)
+
 type Definition struct {
 	Name           string
 	OperandsWidths []int
@@ -13,17 +29,20 @@ type Definition struct {
 
 var definitions = map[OpCode]*Definition{
 	OpConstant: {"OpConstant", []int{2}},
-	OpAdd: {"OpAdd", []int{}},
+	OpAdd:      {"OpAdd", []int{}},
+	OpPop:      {"OpPop", []int{}},
+	OpSub:      {"OpSub", []int{}},
+	OpMul:      {"OpMul", []int{}},
+	OpDiv:      {"OpDiv", []int{}},
+	OpTrue:     {"OpTrue", []int{}},
+	OpFalse:    {"OpFalse", []int{}},
+
+	OpEqual:       {"OpEqual", []int{}},
+	OpNotEqual:    {"OpNotEqual", []int{}},
+	OpGreaterThan: {"OpGreaterThan", []int{}},
 }
 
 type Instructions []byte
-
-type OpCode byte
-
-const (
-	OpConstant OpCode = iota
-	OpAdd
-)
 
 func Make(op OpCode, operands ...int) []byte {
 	def, ok := definitions[op]
