@@ -75,9 +75,9 @@ func StartInteractiveMode(r io.Reader, w io.Writer) {
 
 		if runVm {
 			comp := compiler.NewCompiler()
-			err := comp.Compile(p)
+			err := comp.Compile(p.ParseProgram())
 			if err != nil {
-				fmt.Printf(w, "Woops! Compilation failed:\n %s\n", err)
+				fmt.Fprintf(w, "Woops! Compilation failed:\n %s\n", err)
 				continue
 			}
 
@@ -89,8 +89,11 @@ func StartInteractiveMode(r io.Reader, w io.Writer) {
 			}
 
 			lastPopped := machine.LastPoppedStackElem()
-			io.WriteString(w, lastPopped.Inspect())
-			io.WriteString(w, "\n")
+			if lastPopped != nil {
+				io.WriteString(w, lastPopped.Inspect())
+				io.WriteString(w, "\n")
+			}
+			continue
 		}
 
 		evaluated := interpreter.Eval(p.ParseProgram(), env)

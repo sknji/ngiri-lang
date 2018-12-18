@@ -15,6 +15,7 @@ var True = &object.Boolean{Value: true}
 var False = &object.Boolean{Value: false}
 
 var ErrStackOverflow = errors.New("stack overflow")
+var ErrStackUnderflow = errors.New("stack underflow")
 
 type VM struct {
 	constants    []object.Object
@@ -80,9 +81,43 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+		case code.OpBang:
+			err := vm.executeBangOperator()
+			if err != nil {
+				return err
+			}
+		case code.OpMinus:
+			err := vm.executeMinusOperator()
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
+}
+
+func (vm *VM) executeMinusOperator() error {
+	operand := vm.pop()
+
+	if operand.Type() != object.INTEGER_OBJ {
+		return fmt.Errorf("unsupported type for negation: %s", operand.Type())
+	}
+
+	value := operand.(*object.Integer).Value
+	return vm.push(&object.Integer{Value: -value})
+}
+
+func (vm *VM) executeBangOperator() error {
+	operand := vm.pop()
+
+	switch operand {
+	case True:
+		return vm.push(False)
+	case False:
+		return vm.push(True)
+	default:
+		return vm.push(False)
+	}
 }
 
 func (vm *VM) executeComparison(op code.OpCode) error {
@@ -175,6 +210,10 @@ func (vm *VM) push(o object.Object) error {
 }
 
 func (vm *VM) pop() object.Object {
+	if vm.sp < 1 {
+		return nil
+	}
+
 	o := vm.stack[vm.sp-1]
 	vm.sp--
 	return o
