@@ -22,6 +22,25 @@ func parse(input string) *ast.Program {
 	return parser.NewParser(lexer.NewLexer(input)).ParseProgram()
 }
 
+func TestConditionals(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input:             "if (true) {10}; 3333;",
+			expectedConstants: []interface{}{10, 3333},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpTrue),             // 0000
+				code.Make(code.OpJumpNotTruthy, 7), // 0001
+				code.Make(code.OpConstant, 0),      // 0004
+				code.Make(code.OpPop),              // 0007
+				code.Make(code.OpConstant, 1),      // 0008
+				code.Make(code.OpPop),              // 0011
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 func TestBooleanExpressions(t *testing.T) {
 	tests := []compilerTestCase{
 		{
