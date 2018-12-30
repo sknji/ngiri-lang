@@ -5,15 +5,15 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"github.com/marmotini/monkey-lang/compiler"
-	"github.com/marmotini/monkey-lang/vm"
 	"io"
 	"os"
 
+	"github.com/marmotini/monkey-lang/compiler"
 	"github.com/marmotini/monkey-lang/interpreter"
 	"github.com/marmotini/monkey-lang/lexer"
 	"github.com/marmotini/monkey-lang/object"
 	"github.com/marmotini/monkey-lang/parser"
+	"github.com/marmotini/monkey-lang/vm"
 )
 
 const PROMPT = ">> "
@@ -41,8 +41,18 @@ func main() {
 			}
 		}
 
-		env := object.NewEnvironment()
-		evaluated := interpreter.Eval(p.ParseProgram(), env)
+		var evaluated object.Object
+		if runVm {
+			var err error
+			evaluated, err = executeVM(p, os.Stdout)
+			if err != nil {
+				fmt.Fprintf(os.Stdout, err.Error())
+			}
+		} else {
+			env := object.NewEnvironment()
+			evaluated = interpreter.Eval(p.ParseProgram(), env)
+		}
+
 		if evaluated != nil {
 			io.WriteString(os.Stdout, evaluated.Inspect())
 			io.WriteString(os.Stdout, "\n")
@@ -73,35 +83,38 @@ func StartInteractiveMode(r io.Reader, w io.Writer) {
 			continue
 		}
 
+		var evaluated object.Object
 		if runVm {
-			comp := compiler.NewCompiler()
-			err := comp.Compile(p.ParseProgram())
+			var err error
+			evaluated, err = executeVM(p, os.Stdout)
 			if err != nil {
-				fmt.Fprintf(w, "Woops! Compilation failed:\n %s\n", err)
-				continue
+				fmt.Fprintf(os.Stdout, err.Error())
 			}
-
-			machine := vm.NewVM(comp.Bytecode())
-			err = machine.Run()
-			if err != nil {
-				fmt.Fprintf(w, "Woops! Executing bytecode failed:\n %s\n", err)
-				continue
-			}
-
-			lastPopped := machine.LastPoppedStackElem()
-			if lastPopped != nil {
-				io.WriteString(w, lastPopped.Inspect())
-				io.WriteString(w, "\n")
-			}
-			continue
+		} else {
+			evaluated = interpreter.Eval(p.ParseProgram(), env)
 		}
 
-		evaluated := interpreter.Eval(p.ParseProgram(), env)
 		if evaluated != nil {
 			io.WriteString(w, evaluated.Inspect())
 			io.WriteString(w, "\n")
 		}
 	}
+}
+
+func executeVM(p *parser.Parser, w io.Writer) (object.Object, error) {
+	comp := compiler.NewCompiler()
+	err := comp.Compile(p.ParseProgram())
+	if err != nil {
+		return nil, fmt.Errorf("Woops! Compilation failed:\n %s\n", err)
+	}
+
+	machine := vm.NewVM(comp.Bytecode())
+	err = machine.Run()
+	if err != nil {
+		return nil, fmt.Errorf("Woops! Executing bytecode failed:\n %s\n", err)
+	}
+
+	return machine.LastPoppedStackElem(), nil
 }
 
 func printParseErrors(w io.Writer, errors []string) {
