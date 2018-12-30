@@ -14,6 +14,7 @@ type Compiler struct {
 
 	lastInstruction     EmittedInstruction
 	previousInstruction EmittedInstruction
+	symbolTable         *SymbolTable
 }
 
 type EmittedInstruction struct {
@@ -27,7 +28,16 @@ func NewCompiler() *Compiler {
 		constants:           []object.Object{},
 		lastInstruction:     EmittedInstruction{},
 		previousInstruction: EmittedInstruction{},
+		symbolTable:         NewSymbolTable(),
 	}
+}
+
+func NewWithState(s *SymbolTable, constants []object.Object) *Compiler {
+	compiler := NewCompiler()
+	compiler.symbolTable = s
+	compiler.constants = constants
+
+	return compiler
 }
 
 func (c *Compiler) Compile(node ast.Node) error {
@@ -150,7 +160,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 		default:
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
-
 	case *ast.IntegerLiteral:
 		integer := &object.Integer{Value: node.Value}
 		c.emit(code.OpConstant, c.addConstant(integer))
@@ -165,6 +174,16 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if err != nil {
 			return err
 		}
+
+		symbol := c.symbolTable.Define(node.Name.Value)
+		c.emit(code.OpSetGlobal, symbol.Index)
+	case *ast.Identifier:
+		symbol, ok := c.symbolTable.Resolve(node.Value)
+		if !ok {
+			return fmt.Errorf("undefined variable %s", node.Value)
+		}
+
+		c.emit(code.OpGetGlobal, symbol.Index)
 	}
 
 	return nil
@@ -207,7 +226,7 @@ func (c *Compiler) setLastInstruction(op code.OpCode, pos int) {
 	c.lastInstruction = last
 }
 
-func (c *Compiler) replaceInstruction(pos int, newInstruction []byte)  {
+func (c *Compiler) replaceInstruction(pos int, newInstruction []byte) {
 	for i := 0; i < len(newInstruction); i++ {
 		c.instructions[pos+i] = newInstruction[i]
 	}

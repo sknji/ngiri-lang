@@ -43,8 +43,12 @@ func main() {
 
 		var evaluated object.Object
 		if runVm {
+			constants := []object.Object{}
+			globals := make([]object.Object, vm.GlobalsSize)
+			symbolTable := compiler.NewSymbolTable()
+
 			var err error
-			evaluated, err = executeVM(p, os.Stdout)
+			evaluated, err = executeVM(p, symbolTable, constants, globals, os.Stdout)
 			if err != nil {
 				fmt.Fprintf(os.Stdout, err.Error())
 			}
@@ -68,6 +72,10 @@ func StartInteractiveMode(r io.Reader, w io.Writer) {
 	scanner := bufio.NewScanner(r)
 	env := object.NewEnvironment()
 
+	constants := []object.Object{}
+	globals := make([]object.Object, vm.GlobalsSize)
+	symbolTable := compiler.NewSymbolTable()
+
 	for {
 		fmt.Printf(PROMPT)
 
@@ -86,9 +94,10 @@ func StartInteractiveMode(r io.Reader, w io.Writer) {
 		var evaluated object.Object
 		if runVm {
 			var err error
-			evaluated, err = executeVM(p, os.Stdout)
+			evaluated, err = executeVM(p, symbolTable, constants, globals, os.Stdout)
 			if err != nil {
 				fmt.Fprintf(os.Stdout, err.Error())
+				continue
 			}
 		} else {
 			evaluated = interpreter.Eval(p.ParseProgram(), env)
@@ -101,14 +110,17 @@ func StartInteractiveMode(r io.Reader, w io.Writer) {
 	}
 }
 
-func executeVM(p *parser.Parser, w io.Writer) (object.Object, error) {
-	comp := compiler.NewCompiler()
+func executeVM(
+	p *parser.Parser, sym *compiler.SymbolTable,
+	constants []object.Object, globals []object.Object, w io.Writer) (object.Object, error) {
+
+	comp := compiler.NewWithState(sym, constants)
 	err := comp.Compile(p.ParseProgram())
 	if err != nil {
 		return nil, fmt.Errorf("Woops! Compilation failed:\n %s\n", err)
 	}
 
-	machine := vm.NewVM(comp.Bytecode())
+	machine := vm.NewWithGlobalsStore(comp.Bytecode(), globals)
 	err = machine.Run()
 	if err != nil {
 		return nil, fmt.Errorf("Woops! Executing bytecode failed:\n %s\n", err)

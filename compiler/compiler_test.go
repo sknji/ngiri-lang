@@ -26,7 +26,7 @@ func TestGlobalLetStatements(t *testing.T) {
 	tests := []compilerTestCase{
 		{
 			input:             "let one = 1; let two = 2;",
-			expectedConstants: []interface{}{10, 20, 3333},
+			expectedConstants: []interface{}{1, 2},
 			expectedInstructions: []code.Instructions{
 				code.Make(code.OpConstant, 0),
 				code.Make(code.OpSetGlobal, 0),
@@ -37,23 +37,23 @@ func TestGlobalLetStatements(t *testing.T) {
 		},
 		{
 			input:             "let one = 1; one;",
-			expectedConstants: []interface{}{10, 20, 3333},
+			expectedConstants: []interface{}{1},
 			expectedInstructions: []code.Instructions{
 				code.Make(code.OpConstant, 0),
 				code.Make(code.OpSetGlobal, 0),
-				code.Make(code.OpGetGlobals, 0),
+				code.Make(code.OpGetGlobal, 0),
 				code.Make(code.OpPop),
 			},
 		},
 		{
 			input:             "let one = 1; let two = one; two",
-			expectedConstants: []interface{}{10, 20, 3333},
+			expectedConstants: []interface{}{1},
 			expectedInstructions: []code.Instructions{
 				code.Make(code.OpConstant, 0),
 				code.Make(code.OpSetGlobal, 0),
-				code.Make(code.OpGetGlobals, 0),
+				code.Make(code.OpGetGlobal, 0),
 				code.Make(code.OpSetGlobal, 1),
-				code.Make(code.OpGetGlobals, 1),
+				code.Make(code.OpGetGlobal, 1),
 				code.Make(code.OpPop),
 			},
 		},
@@ -68,28 +68,28 @@ func TestConditionals(t *testing.T) {
 			input:             "if (true) {10} else {20}; 3333;",
 			expectedConstants: []interface{}{10, 20, 3333},
 			expectedInstructions: []code.Instructions{
-				code.Make(code.OpTrue),                              // 0000
-				code.Make(code.OpJumpNotTruthy, 10),       // 0001
-				code.Make(code.OpConstant, 0),             // 0004
-				code.Make(code.OpJump, 13),                // 0007
-				code.Make(code.OpConstant, 1),             // 0010
-				code.Make(code.OpPop),                              // 0013
-				code.Make(code.OpConstant, 2),             // 0014
-				code.Make(code.OpPop),                              // 0017
+				code.Make(code.OpTrue),              // 0000
+				code.Make(code.OpJumpNotTruthy, 10), // 0001
+				code.Make(code.OpConstant, 0),       // 0004
+				code.Make(code.OpJump, 13),          // 0007
+				code.Make(code.OpConstant, 1),       // 0010
+				code.Make(code.OpPop),               // 0013
+				code.Make(code.OpConstant, 2),       // 0014
+				code.Make(code.OpPop),               // 0017
 			},
 		},
 		{
 			input:             "if (true) {10}; 3333;",
 			expectedConstants: []interface{}{10, 3333},
 			expectedInstructions: []code.Instructions{
-				code.Make(code.OpTrue),                              // 0000
-				code.Make(code.OpJumpNotTruthy, 10),       // 0001
-				code.Make(code.OpConstant, 0),             // 0004
-				code.Make(code.OpJump, 11),                // 0007
-				code.Make(code.OpNull),                             // 0010
-				code.Make(code.OpPop),                              // 0011
-				code.Make(code.OpConstant, 1),             // 0012
-				code.Make(code.OpPop),                              // 0015
+				code.Make(code.OpTrue),              // 0000
+				code.Make(code.OpJumpNotTruthy, 10), // 0001
+				code.Make(code.OpConstant, 0),       // 0004
+				code.Make(code.OpJump, 11),          // 0007
+				code.Make(code.OpNull),              // 0010
+				code.Make(code.OpPop),               // 0011
+				code.Make(code.OpConstant, 1),       // 0012
+				code.Make(code.OpPop),               // 0015
 			},
 		},
 	}
