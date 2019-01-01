@@ -321,3 +321,8 @@ func (ie *IndexExpression) String() string {
 
 	return out.String()
 }
+
+type ArrayLiteral struct {
+	Token    token.Token
+	Elements []Expression
+}

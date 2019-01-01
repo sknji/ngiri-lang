@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 
@@ -11,6 +12,7 @@ import (
 
 const StackSize = 2048
 const GlobalsSize = 65536
+const MaxFrames = 1024
 
 var True = &object.Boolean{Value: true}
 var False = &object.Boolean{Value: false}
@@ -27,15 +29,26 @@ type VM struct {
 	sp    int
 
 	globals []object.Object
+
+	frames     []*Frame
+	frameIndex int
 }
 
 func NewVM(bytecode *compiler.Bytecode) *VM {
+	mainFn := &object.CompiledFunction{Instructions: bytecode.Instructions}
+	mainFrame := NewFrame(mainFn)
+
+	frames := make([]*Frame, MaxFrames)
+	frames[0] = mainFrame
+
 	return &VM{
 		stack:        make([]object.Object, StackSize),
 		sp:           0,
-		globals: make([]object.Object, GlobalsSize),
+		globals:      make([]object.Object, GlobalsSize),
 		constants:    bytecode.Constants,
 		instructions: bytecode.Instructions,
+		frames:       frames,
+		frameIndex:   1,
 	}
 }
 
@@ -60,19 +73,23 @@ func (vm *VM) LastPoppedStackElem() object.Object {
 
 // Run contains the fetch-decode-execute cycle
 func (vm *VM) Run() error {
-	for ip := 0; ip < len(vm.instructions); ip++ {
-		op := code.OpCode(vm.instructions[ip])
+	for vm.currentFrame().ip < len(vm.currentFrame().Instructions())-1 {
+		vm.currentFrame().ip++
+
+		ins := vm.currentFrame().Instructions()
+		op := code.OpCode(ins[vm.currentFrame().ip])
+
 		switch op {
 		case code.OpJumpNotTruthy:
-			pos := int(code.ReadUint16(vm.instructions[ip+1:]))
-			ip += 2
+			pos := int(code.ReadUint16(ins[vm.currentFrame().ip+1:]))
+			vm.currentFrame().ip += 2
 			condition := vm.pop()
 			if !isTruthy(condition) {
-				ip = pos - 1
+				vm.currentFrame().ip = pos - 1
 			}
 		case code.OpJump:
-			pos := int(code.ReadUint16(vm.instructions[ip+1:]))
-			ip = pos - 1
+			pos := int(code.ReadUint16(ins[vm.currentFrame().ip+1:]))
+			vm.currentFrame().ip = pos - 1
 		case code.OpTrue:
 			err := vm.push(True)
 			if err != nil {
@@ -86,8 +103,8 @@ func (vm *VM) Run() error {
 		case code.OpPop:
 			vm.pop()
 		case code.OpConstant:
-			constIndex := code.ReadUint16(vm.instructions[ip+1:])
-			ip += 2
+			constIndex := code.ReadUint16(ins[vm.currentFrame().ip+1:])
+			vm.currentFrame().ip += 2
 
 			err := vm.push(vm.constants[constIndex])
 			if err != nil {
@@ -119,14 +136,40 @@ func (vm *VM) Run() error {
 				return err
 			}
 		case code.OpSetGlobal:
-			globalIndex := code.ReadUint16(vm.instructions[ip+1:])
-			ip +=2
+			globalIndex := code.ReadUint16(ins[vm.currentFrame().ip+1:])
+			vm.currentFrame().ip += 2
 			vm.globals[globalIndex] = vm.pop()
 		case code.OpGetGlobal:
-			globalIndex := code.ReadUint16(vm.instructions[ip+1:])
-			ip +=2
+			globalIndex := code.ReadUint16(ins[vm.currentFrame().ip+1:])
+			vm.currentFrame().ip += 2
 
 			err := vm.push(vm.globals[globalIndex])
+			if err != nil {
+				return err
+			}
+		case code.OpCall:
+			fn, ok := vm.stack[vm.sp-1].(*object.CompiledFunction)
+			if !ok {
+				return fmt.Errorf("calling non-function")
+			}
+
+			frame := NewFrame(fn)
+			vm.pushFrame(frame)
+		case code.OpReturnValue:
+			returnValue := vm.pop()
+
+			vm.popFrame()
+			vm.pop()
+
+			err := vm.push(returnValue)
+			if err != nil{
+				return err
+			}
+		case code.OpReturn:
+			vm.popFrame()
+			vm.pop()
+
+			err := vm.push(Null)
 			if err != nil {
 				return err
 			}
@@ -211,11 +254,25 @@ func (vm *VM) executeBinaryOperation(op code.OpCode) error {
 	leftType := left.Type()
 	rightType := right.Type()
 
-	if leftType == object.INTEGER_OBJ && rightType == object.INTEGER_OBJ {
+	switch {
+	case leftType == object.INTEGER_OBJ && rightType == object.INTEGER_OBJ:
 		return vm.executeBinaryIntegerOperation(op, left, right)
+	case leftType == object.STRING_OBJ && rightType == object.STRING_OBJ:
+		return vm.executeBinaryStringOperation(op, left, right)
+	default:
+		return fmt.Errorf("unsupported types for binary operation: %s %s", leftType, rightType)
+	}
+}
+
+func (vm *VM) executeBinaryStringOperation(op code.OpCode, left, right object.Object) error {
+	if op != code.OpAdd {
+		return fmt.Errorf("unknown string operation: %d", op)
 	}
 
-	return fmt.Errorf("unsupported types for binary operation: %s %s", leftType, rightType)
+	leftValue := left.(*object.String).Value
+	rightValue := right.(*object.String).Value
+
+	return vm.push(&object.String{Value: leftValue + rightValue})
 }
 
 func (vm *VM) executeBinaryIntegerOperation(op code.OpCode, left, right object.Object) error {
@@ -260,6 +317,33 @@ func (vm *VM) pop() object.Object {
 	vm.sp--
 
 	return o
+}
+
+func (vm *VM) debugStack() string {
+	var buf bytes.Buffer
+
+	buf.WriteString("Stack:\n")
+	for i := 0; i < vm.sp; i++ {
+		if vm.stack[i] != nil {
+			buf.WriteString(fmt.Sprintf("%d. %s\n", i, vm.stack[i].Inspect()))
+		}
+	}
+
+	return buf.String()
+}
+
+func (vm *VM) currentFrame() *Frame {
+	return vm.frames[vm.frameIndex-1]
+}
+
+func (vm *VM) pushFrame(frame *Frame) {
+	vm.frames[vm.frameIndex] = frame
+	vm.frameIndex++
+}
+
+func (vm *VM) popFrame() *Frame {
+	vm.frameIndex--
+	return vm.frames[vm.frameIndex]
 }
 
 func isTruthy(obj object.Object) bool {

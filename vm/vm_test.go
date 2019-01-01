@@ -16,6 +16,25 @@ type vmTestCase struct {
 	expected interface{}
 }
 
+func TestCallingFunctionWithoutArguments(t *testing.T) {
+	tests := []vmTestCase{
+		{`let fivePlusTen = fn() { 5 + 10; }; fivePlusTen();`,15},
+		{`let one = fn() { 1; }; let two = fn() { 2; }; one() + two();`,3},
+		{`let a = fn() { 1; }; let b = fn() { a() + 1; }; let c = fn() { b() + 1}; c();`,3},
+	}
+
+	runVmTests(t, tests)
+}
+
+func TestStringExpression(t *testing.T) {
+	tests := []vmTestCase{
+		{`"monkey"`, "monkey"},
+		{`"mon" + "key"`, "monkey"},
+		{`"mon" + "key" + "banana"`, "monkeybanana"},
+	}
+
+	runVmTests(t, tests)
+}
 func TestGlobalLetStatements(t *testing.T) {
 	tests := []vmTestCase{
 		{"let one = 1; one", 1},
@@ -137,6 +156,11 @@ func testExpectedObject(t *testing.T, expected interface{}, actual object.Object
 		if err != nil {
 			t.Errorf("testBooleanObject failed: %s", err)
 		}
+	case string:
+		err := testStringObject(expected, actual)
+		if err != nil {
+			t.Errorf("testStringObject failed: %s", err)
+		}
 	case *object.Null:
 		if actual != Null {
 			t.Errorf("object is not NUll: %T (%+v)", actual, actual)
@@ -146,6 +170,19 @@ func testExpectedObject(t *testing.T, expected interface{}, actual object.Object
 
 func parse(input string) *ast.Program {
 	return parser.NewParser(lexer.NewLexer(input)).ParseProgram()
+}
+
+func testStringObject(expected string, actual object.Object) error {
+	result, ok := actual.(*object.String)
+	if !ok {
+		return fmt.Errorf("object is not String. got=%T (%+v)", actual, actual)
+	}
+
+	if result.Value != expected {
+		return fmt.Errorf("object has wrong value. got=%q, want=%q", result.Value, expected)
+	}
+
+	return nil
 }
 
 func testBooleanObject(expected bool, actual object.Object) error {

@@ -30,6 +30,13 @@ const (
 
 	OpGetGlobal
 	OpSetGlobal
+
+	OpArray
+	OpHash
+
+	OpCall
+	OpReturnValue
+	OpReturn
 )
 
 type Definition struct {
@@ -61,6 +68,13 @@ var definitions = map[OpCode]*Definition{
 
 	OpGetGlobal: {"OpGetGlobal", []int{2}},
 	OpSetGlobal: {"OpSetGlobal", []int{2}},
+
+	OpArray: {"OpArray", []int{2}},
+	OpHash:  {"OpHash", []int{}},
+
+	OpCall:        {"OpCall", []int{}},
+	OpReturnValue: {"OpReturnValue", []int{}},
+	OpReturn:      {"OpReturn", []int{}},
 }
 
 type Instructions []byte
