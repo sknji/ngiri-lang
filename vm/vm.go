@@ -162,7 +162,7 @@ func (vm *VM) Run() error {
 			vm.pop()
 
 			err := vm.push(returnValue)
-			if err != nil{
+			if err != nil {
 				return err
 			}
 		case code.OpReturn:
