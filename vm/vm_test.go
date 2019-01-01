@@ -16,6 +16,20 @@ type vmTestCase struct {
 	expected interface{}
 }
 
+func TestCallingFunctionsWithBindings(t *testing.T) {
+	tests := []vmTestCase{
+		{"let one = fn() { let one = 1; one}; one();", 1},
+		//{"let oneAndTwo = fn() { let one = 1; let two = 2; one + two}; oneAndTwo();", 3},
+		//{"let oneAndTwo = fn() { let one = 1; let two = 2; one + two;};" +
+		//	"let threeAndFour = fn() { let three =3; let four = 4; three + four;} threeAndFour() + oneAndTwo();", 10},
+		//{"let firstFooBar = fn() { let fooBar = 50; fooBar; };" +
+		//	"let secondFooBar = fn() { let foobar = 100; foobar; } firstFooBar() + secondFooBar();", 150},
+		//{"let globalSeed = 50; " +
+		//	"let minusTwo = fn() { let num = 2; globalSeed - num; }; minusOne() + minusTwo()", 97},
+	}
+
+	runVmTests(t, tests)
+}
 func TestCallingFunctionWithoutArguments(t *testing.T) {
 	tests := []vmTestCase{
 		{`let fivePlusTen = fn() { 5 + 10; }; fivePlusTen();`, 15},

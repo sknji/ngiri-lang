@@ -22,15 +22,104 @@ func parse(input string) *ast.Program {
 	return parser.NewParser(lexer.NewLexer(input)).ParseProgram()
 }
 
+func TestLetStatementsScopes(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: "let num = 55; fn() { num }",
+			expectedConstants: []interface{}{
+				55,
+				[]code.Instructions{
+					code.Make(code.OpGetGlobal, 0),
+					code.Make(code.OpReturnValue),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpSetGlobal, 0),
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpPop),
+			},
+		},
+		{
+			input: "fn() { let num = 55; num }",
+			expectedConstants: []interface{}{
+				55,
+				[]code.Instructions{
+					code.Make(code.OpConstant, 0),
+					code.Make(code.OpSetLocal, 0),
+					code.Make(code.OpGetLocal, 0),
+					code.Make(code.OpReturnValue),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpPop),
+			},
+		},
+		{
+			input: "fn() { let a = 55; let b = 77; a + b }",
+			expectedConstants: []interface{}{
+				55,
+				77,
+				[]code.Instructions{
+					code.Make(code.OpConstant, 0),
+					code.Make(code.OpSetLocal, 0),
+					code.Make(code.OpConstant, 1),
+					code.Make(code.OpSetLocal, 1),
+					code.Make(code.OpGetLocal, 0),
+					code.Make(code.OpGetLocal, 1),
+					code.Make(code.OpAdd),
+					code.Make(code.OpReturnValue),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 2),
+				code.Make(code.OpPop),
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
 func TestCompilerScopes(t *testing.T) {
 	compiler := NewCompiler()
 	if compiler.scopeIndex != 0 {
 		t.Errorf("scopeIndex wrong. got=%d, want=%d", compiler.scopeIndex, 0)
 	}
 
+	globalSymbolTable := compiler.symbolTable
+
 	compiler.emit(code.OpMul)
 
 	compiler.enterScope()
+
+	assert.Equal(t, 1, compiler.scopeIndex)
+
+	compiler.emit(code.OpSub)
+
+	assert.Equal(t, 1, len(compiler.scopes[compiler.scopeIndex].instructions))
+
+	last := compiler.scopes[compiler.scopeIndex].lastInstruction
+	assert.Equal(t, code.OpSub, last.OpCode)
+
+	assert.Equal(t, globalSymbolTable, compiler.symbolTable.Outer)
+
+	compiler.leaveScope()
+
+	assert.Equal(t, 0, compiler.scopeIndex)
+
+	assert.Equal(t, compiler.symbolTable, globalSymbolTable)
+	assert.Nil(t, compiler.symbolTable.Outer)
+
+	compiler.emit(code.OpAdd)
+
+	assert.Equal(t, 2, len(compiler.scopes[compiler.scopeIndex].instructions))
+
+	last = compiler.scopes[compiler.scopeIndex].lastInstruction
+	assert.Equal(t, code.OpAdd, last.OpCode)
+
+	previous := compiler.scopes[compiler.scopeIndex].previousInstruction
+	assert.Equal(t, code.OpMul, previous.OpCode)
 }
 
 func TestFunctionCalls(t *testing.T) {
