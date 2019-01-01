@@ -6,8 +6,8 @@ import (
 )
 
 type Frame struct {
-	fn *object.CompiledFunction
-	ip int
+	fn          *object.CompiledFunction
+	ip          int
 	basePointer int
 }
 

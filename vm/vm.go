@@ -156,7 +156,7 @@ func (vm *VM) Run() error {
 			localIndex := code.ReadUint8(ins[vm.currentFrame().ip+1:])
 			vm.currentFrame().ip += 1
 
-			err := vm.push(vm.stack[vm.currentFrame().basePointer + int(localIndex)])
+			err := vm.push(vm.stack[vm.currentFrame().basePointer+int(localIndex)])
 			if err != nil {
 				return err
 			}
