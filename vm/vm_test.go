@@ -16,16 +16,29 @@ type vmTestCase struct {
 	expected interface{}
 }
 
+func TestCallingFunctionsWithArgumentsAndBindings(t *testing.T) {
+	tests := []vmTestCase {
+		{"let identity = fn(a) { a; }; identity(4);", 4},
+		{"let sum = fn(a, b) { a + b; }; sum(1, 2);", 3},
+		{"let sum = fn(a, b) { let c = a + b; c;}; sum(1, 2);", 3},
+		{"let sum = fn(a, b) { a + b; }; sum(1, 2) + sum(3, 4);", 10},
+		{"let sum = fn(a, b) { let c = a + b; c; }; let outer = fn() { sum(1, 2) + sum(3, 4)}; outer();", 10},
+		{"let globalNum = 10; let sum = fn(a, b) { let c = a + b; c + globalNum; }; let outer = fn() { sum(1, 2) + sum(3, 4) + globalNum}; outer() + globalNum;", 50},
+	}
+
+	runVmTests(t, tests)
+}
+
 func TestCallingFunctionsWithBindings(t *testing.T) {
 	tests := []vmTestCase{
 		{"let one = fn() { let one = 1; one}; one();", 1},
-		//{"let oneAndTwo = fn() { let one = 1; let two = 2; one + two}; oneAndTwo();", 3},
-		//{"let oneAndTwo = fn() { let one = 1; let two = 2; one + two;};" +
-		//	"let threeAndFour = fn() { let three =3; let four = 4; three + four;} threeAndFour() + oneAndTwo();", 10},
-		//{"let firstFooBar = fn() { let fooBar = 50; fooBar; };" +
-		//	"let secondFooBar = fn() { let foobar = 100; foobar; } firstFooBar() + secondFooBar();", 150},
-		//{"let globalSeed = 50; " +
-		//	"let minusTwo = fn() { let num = 2; globalSeed - num; }; minusOne() + minusTwo()", 97},
+		{"let oneAndTwo = fn() { let one = 1; let two = 2; one + two}; oneAndTwo();", 3},
+		{"let oneAndTwo = fn() { let one = 1; let two = 2; one + two;};" +
+			"let threeAndFour = fn() { let three =3; let four = 4; three + four;} threeAndFour() + oneAndTwo();", 10},
+		{"let firstFooBar = fn() { let fooBar = 50; fooBar; };" +
+			"let secondFooBar = fn() { let foobar = 100; foobar; } firstFooBar() + secondFooBar();", 150},
+		{"let globalSeed = 50; let minusOne = fn() { let num = 1; globalSeed - num; }; " +
+			"let minusTwo = fn() { let num = 2; globalSeed - num; }; minusOne() + minusTwo()", 97},
 	}
 
 	runVmTests(t, tests)
