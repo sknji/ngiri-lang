@@ -3,9 +3,9 @@ package interpreter
 import (
 	"testing"
 
-	"github.com/marmotini/monkey-lang/lexer"
-	"github.com/marmotini/monkey-lang/object"
-	"github.com/marmotini/monkey-lang/parser"
+	"github.com/marmotini/ngiri-lang/lexer"
+	"github.com/marmotini/ngiri-lang/object"
+	"github.com/marmotini/ngiri-lang/parser"
 )
 
 func TestEvalIntegerExpression(t *testing.T) {

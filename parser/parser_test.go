@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/marmotini/monkey-lang/ast"
-	"github.com/marmotini/monkey-lang/lexer"
+	"github.com/marmotini/ngiri-lang/ast"
+	"github.com/marmotini/ngiri-lang/lexer"
 )
 
 func TestLetStatements(t *testing.T) {

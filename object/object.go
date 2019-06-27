@@ -3,10 +3,10 @@ package object
 import (
 	"bytes"
 	"fmt"
-	"github.com/marmotini/monkey-lang/code"
+	"github.com/marmotini/ngiri-lang/code"
 	"strings"
 
-	"github.com/marmotini/monkey-lang/ast"
+	"github.com/marmotini/ngiri-lang/ast"
 )
 
 type ObjectType string

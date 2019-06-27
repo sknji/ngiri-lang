@@ -3,7 +3,7 @@ package interpreter
 import (
 	"fmt"
 
-	"github.com/marmotini/monkey-lang/object"
+	"github.com/marmotini/ngiri-lang/object"
 )
 
 var builtins = map[string]*object.BuiltIn{

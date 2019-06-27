@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/marmotini/monkey-lang/code"
-	"github.com/marmotini/monkey-lang/compiler"
-	"github.com/marmotini/monkey-lang/object"
+	"github.com/marmotini/ngiri-lang/code"
+	"github.com/marmotini/ngiri-lang/compiler"
+	"github.com/marmotini/ngiri-lang/object"
 )
 
 const StackSize = 2048

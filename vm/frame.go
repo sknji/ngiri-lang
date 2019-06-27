@@ -1,8 +1,8 @@
 package vm
 
 import (
-	"github.com/marmotini/monkey-lang/code"
-	"github.com/marmotini/monkey-lang/object"
+	"github.com/marmotini/ngiri-lang/code"
+	"github.com/marmotini/ngiri-lang/object"
 )
 
 type Frame struct {

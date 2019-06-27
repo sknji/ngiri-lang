@@ -3,9 +3,9 @@ package compiler
 import (
 	"bytes"
 	"fmt"
-	"github.com/marmotini/monkey-lang/ast"
-	"github.com/marmotini/monkey-lang/code"
-	"github.com/marmotini/monkey-lang/object"
+	"github.com/marmotini/ngiri-lang/ast"
+	"github.com/marmotini/ngiri-lang/code"
+	"github.com/marmotini/ngiri-lang/object"
 )
 
 type Compiler struct {

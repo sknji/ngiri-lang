@@ -8,12 +8,12 @@ import (
 	"io"
 	"os"
 
-	"github.com/marmotini/monkey-lang/compiler"
-	"github.com/marmotini/monkey-lang/interpreter"
-	"github.com/marmotini/monkey-lang/lexer"
-	"github.com/marmotini/monkey-lang/object"
-	"github.com/marmotini/monkey-lang/parser"
-	"github.com/marmotini/monkey-lang/vm"
+	"github.com/marmotini/ngiri-lang/compiler"
+	"github.com/marmotini/ngiri-lang/interpreter"
+	"github.com/marmotini/ngiri-lang/lexer"
+	"github.com/marmotini/ngiri-lang/object"
+	"github.com/marmotini/ngiri-lang/parser"
+	"github.com/marmotini/ngiri-lang/vm"
 )
 
 const PROMPT = ">> "

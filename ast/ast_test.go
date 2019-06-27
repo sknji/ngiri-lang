@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"github.com/marmotini/monkey-lang/token"
+	"github.com/marmotini/ngiri-lang/token"
 	"testing"
 )
 

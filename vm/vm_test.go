@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/marmotini/monkey-lang/ast"
-	"github.com/marmotini/monkey-lang/compiler"
-	"github.com/marmotini/monkey-lang/lexer"
-	"github.com/marmotini/monkey-lang/object"
-	"github.com/marmotini/monkey-lang/parser"
+	"github.com/marmotini/ngiri-lang/ast"
+	"github.com/marmotini/ngiri-lang/compiler"
+	"github.com/marmotini/ngiri-lang/lexer"
+	"github.com/marmotini/ngiri-lang/object"
+	"github.com/marmotini/ngiri-lang/parser"
 )
 
 type vmTestCase struct {
@@ -55,9 +55,9 @@ func TestCallingFunctionWithoutArguments(t *testing.T) {
 
 func TestStringExpression(t *testing.T) {
 	tests := []vmTestCase{
-		{`"monkey"`, "monkey"},
-		{`"mon" + "key"`, "monkey"},
-		{`"mon" + "key" + "banana"`, "monkeybanana"},
+		{`"ngiri"`, "ngiri"},
+		{`"mon" + "key"`, "ngiri"},
+		{`"mon" + "key" + "banana"`, "ngiribanana"},
 	}
 
 	runVmTests(t, tests)

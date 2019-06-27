@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/marmotini/monkey-lang/ast"
-	"github.com/marmotini/monkey-lang/code"
-	"github.com/marmotini/monkey-lang/lexer"
-	"github.com/marmotini/monkey-lang/object"
-	"github.com/marmotini/monkey-lang/parser"
+	"github.com/marmotini/ngiri-lang/ast"
+	"github.com/marmotini/ngiri-lang/code"
+	"github.com/marmotini/ngiri-lang/lexer"
+	"github.com/marmotini/ngiri-lang/object"
+	"github.com/marmotini/ngiri-lang/parser"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -304,8 +304,8 @@ func TestArrayLiterals(t *testing.T) {
 func TestStringExpressions(t *testing.T) {
 	tests := []compilerTestCase{
 		{
-			input:             `"monkey"`,
-			expectedConstants: []interface{}{"monkey"},
+			input:             `"ngiri"`,
+			expectedConstants: []interface{}{"ngiri"},
 			expectedInstructions: []code.Instructions{
 				code.Make(code.OpConstant, 0),
 				code.Make(code.OpPop),

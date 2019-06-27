@@ -1,7 +1,7 @@
 // takes source code as input and output tokens that represent the source code
 package lexer
 
-import "github.com/marmotini/monkey-lang/token"
+import "github.com/marmotini/ngiri-lang/token"
 
 type Lexer struct {
 	input        string

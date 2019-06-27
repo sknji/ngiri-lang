@@ -3,8 +3,8 @@ package interpreter
 import (
 	"fmt"
 
-	"github.com/marmotini/monkey-lang/ast"
-	"github.com/marmotini/monkey-lang/object"
+	"github.com/marmotini/ngiri-lang/ast"
+	"github.com/marmotini/ngiri-lang/object"
 )
 
 var (

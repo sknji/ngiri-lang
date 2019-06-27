@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/marmotini/monkey-lang/ast"
-	"github.com/marmotini/monkey-lang/lexer"
-	"github.com/marmotini/monkey-lang/token"
+	"github.com/marmotini/ngiri-lang/ast"
+	"github.com/marmotini/ngiri-lang/lexer"
+	"github.com/marmotini/ngiri-lang/token"
 )
 
 type (
