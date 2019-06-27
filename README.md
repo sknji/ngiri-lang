@@ -6,5 +6,5 @@
 Extending the [monkey language](https://interpreterbook.com/) with the following learning goals:
 
 - [ ] Create an llvm compiler backend 
-- [ ] Convert the stack based VM to a based vm 
+- [ ] Convert the stack based VM to a register based vm 
 - [ ] Experiment on generating x86-64 code
